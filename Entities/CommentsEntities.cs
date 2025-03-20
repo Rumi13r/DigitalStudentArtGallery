@@ -13,6 +13,6 @@ namespace DigitalStudentArtGallery.Entities
         [ForeignKey(nameof(OwnerId))]
         public User Owner { get; set; }
         [ForeignKey(nameof(PostId))]
-        public Post MainPost { get; set; }
+        public CommentsEntities MainPost { get; set; }
     }
 }

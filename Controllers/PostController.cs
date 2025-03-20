@@ -1,23 +1,29 @@
 ﻿using DigitalStudentArtGallery.Repositories;
-using DigitalStudentArtGallery.ViewModels;
-using DigitalStudentArtGallery.ViewModels.Comment;
 using Microsoft.AspNetCore.Mvc;
+using DigitalStudentArtGallery.Entities;
+using DigitalStudentArtGallery.Extentions;
+using DigitalStudentArtGallery.ViewModels.Posts;
 using Microsoft.Extensions.Hosting;
 
 namespace DigitalStudentArtGallery.Controllers
 {
-    public class PostController
+    public class PostController : Controller
     {
+        private readonly PostRepository _postRepository;
+        private readonly CommentRepository _commentRepository;
+
+        public PostController()
+        {
+            _postRepository = new PostRepository();
+            _commentRepository = new CommentRepository();
+        }
+
         [HttpGet]
         public IActionResult Index()
         {
             IndexVM vm = new IndexVM();
-
-            PostRepository postRepository = new PostRepository();
-            CommentRepository commentRepository = new CommentRepository();
-            vm.Posts = postRepository.GetAll();
-            vm.Comments = commentRepository.GetAll();
-
+            vm.Posts = _postRepository.GetAll();
+            vm.Comments = _commentRepository.GetAll();
             return View(vm);
         }
 
@@ -29,11 +35,10 @@ namespace DigitalStudentArtGallery.Controllers
         [HttpPost]
         public IActionResult Index(IndexVM vm)
         {
-            PostRepository postRepository = new PostRepository();
-            Posts post = postRepository.GetById(vm.Id);
+            PostsEntities post = _postRepository.GetById(vm.Id);
             post.Likes++;
 
-            postRepository.Save(post);
+            _postRepository.Save(post);
 
             return View();
         }
@@ -52,7 +57,7 @@ namespace DigitalStudentArtGallery.Controllers
         [HttpPost]
         public IActionResult Create(CreateVM vm)
         {
-            Posts post = new Posts();
+            PostsEntities post = new PostsEntities();
 
             post.OwnerId = HttpContext.Session.GetObject<User>("loggedUser").Id;
             post.Title = vm.Title;
@@ -60,8 +65,7 @@ namespace DigitalStudentArtGallery.Controllers
             post.Type = vm.Type;
             post.CreatedAt = DateTime.Now;
 
-            PostRepository postRepository = new PostRepository();
-            postRepository.Save(post);
+            _postRepository.Save(post);
 
             return RedirectToActionResult("Index", "Post");
         }
@@ -74,8 +78,9 @@ namespace DigitalStudentArtGallery.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            PostRepository postRepository = new PostRepository();
-            Posts post = postRepository.GetById(id);
+            PostRepository PostRepository = new PostRepository();
+
+            PostsEntities post = PostRepository.GetById(id);
 
             EditVM vm = new EditVM();
             vm.Id = id;
@@ -88,7 +93,7 @@ namespace DigitalStudentArtGallery.Controllers
         [HttpPost]
         public IActionResult Edit(EditVM vm)
         {
-            Posts post = new Posts();
+            PostsEntities post = new PostsEntities();
 
             post.Id = vm.Id;
             post.Title = vm.Title;
@@ -96,20 +101,16 @@ namespace DigitalStudentArtGallery.Controllers
             post.Type = vm.Type;
             post.CreatedAt = DateTime.Now;
 
-            PostRepository postRepository = new PostRepository();
-            postRepository.Save(post);
+            _postRepository.Save(post);
 
             return RedirectToActionResult("Index", "Post");
         }
 
         public IActionResult Delete(int id)
         {
-            PostRepository repo = new PostRepository();
-
-            Posts toDelete = repo.GetById(id);
-
+            PostsEntities toDelete = _postRepository.GetById(id);
             if (toDelete != null)
-                repo.Delete(toDelete);
+                _postRepository.Delete(toDelete);
 
             return RedirectToActionResult("Index", "Posts");
         }

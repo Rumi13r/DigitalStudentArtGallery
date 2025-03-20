@@ -38,7 +38,7 @@ namespace DigitalStudentArtGallery.Controllers
         public IActionResult Index(IndexVM vm, CommentRepository commentRepository, CommentRepository commentRepo)
         {
             CommentRepository commentRepoInstance = new CommentRepository();
-            Comment comment = commentRepoInstance.GetById(vm.Id);
+            CommentsEntities comment = commentRepoInstance.GetById(vm.Id);
             comment.Likes++;
 
             commentRepoInstance.Save(comment);
@@ -48,7 +48,7 @@ namespace DigitalStudentArtGallery.Controllers
         [HttpGet]
         public IActionResult Create(CreateVM vm)
         {
-            Comments comment = new Comments();
+            CommentsEntities comment = new CommentsEntities();
 
             comment.OwnerId = HttpContext.Session.GetObject<User>("loggedUser").Id;
             comment.PostId = vm.PostId;
@@ -65,7 +65,7 @@ namespace DigitalStudentArtGallery.Controllers
         public IActionResult Edit(int id)
         {
             CommentRepository commentRepository = new CommentRepository();
-            Comments comment = CommentRepository.GetById(id);
+            CommentsEntities comment = commentRepository.GetById(id);
 
             EditVM vm = new EditVM();
             vm.OwnerId = id;
@@ -77,13 +77,13 @@ namespace DigitalStudentArtGallery.Controllers
         [HttpPost]
         public IActionResult Edit(EditVM vm)
         {
-            Comments comment = Comments();
+            CommentRepository commentRepository = new CommentRepository();
+            CommentsEntities comment =  commentRepository.GetById(vm.Id);
 
-            vm.OwnerId = id;
+            vm.OwnerId = vm.Id;
             vm.PostId = comment.PostId;
             vm.Text = comment.Text;
 
-            CommentRepository commentRepository = new CommentRepository();
             commentRepository.Save(comment);
 
             return RedirectToAction("Index", "Comment");
@@ -93,7 +93,7 @@ namespace DigitalStudentArtGallery.Controllers
         {
             CommentRepository repo = new CommentRepository();
 
-            Comments toDelete = repo.GetById(id);
+            CommentsEntities toDelete = repo.GetById(id);
 
             if (toDelete != null)
                 repo.Delete(toDelete);
